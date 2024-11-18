@@ -39,6 +39,16 @@ sbatch -A Eels -t 24:00:00 -c 8 --mem 24G --job-name merge --wrap\
 sbatch -A Eels -t 12:00:00 --job-name line_count --wrap\
  "bcftools view -H /faststorage/project/Eels/eel_combined_Aja/VCF/Eels_raw.vcf | wc -l"
 
+#-----------Rename individuals in header
+file="/faststorage/project/Eels/eel_combined_Aja/eel_combined_Aja/individuals.txt"
+input="/faststorage/project/Eels/eel_combined_Aja/eel_combined_Aja/VCF/Eels_raw.vcf"
+output="/faststorage/project/Eels/eel_combined_Aja/eel_combined_Aja/VCF/Eels_raw.reheader.vcf"
+
+sbatch -A Coregonus -t 12:00:00 --wrap\
+ "bcftools reheader -s $file $input > $output"
+
+#mv $output $input
+
 #===========Inspect SNP depth distribution
 awk '($0!~/^#/)&&($8~/^DP/){split($8,a,"[=;]");print a[2]}'\
  /faststorage/project/Eels/eel_combined_Aja/VCF/Eels_raw.vcf > /faststorage/project/Eels/eel_combined_Aja/VCF/Eels_raw.snp.depth
