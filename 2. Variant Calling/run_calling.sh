@@ -53,7 +53,7 @@ dev.off()
 
 #===========Filter (indels, monomorphic, depth, MapQ)
 sbatch -A Eels -t 12:00:00 --job-name vcf.sh --wrap\
- "vcfutils.pl varFilter -Q 20 -d 800 -D 1560 /faststorage/project/Eels/eel_combined_Aja/VCF/Eels_raw.vcf | vcftools --vcf - --remove-indels --maf 0.0001 --recode --recode-INFO-all --out /faststorage/project/Eels/eel_combined_Aja/VCF/Eels_filtered"
+ "vcfutils.pl varFilter -Q 20 -d 900 -D 1500 /faststorage/project/Eels/eel_combined_Aja/VCF/Eels_raw.vcf | vcftools --vcf - --remove-indels --maf 0.0001 --recode --recode-INFO-all --out /faststorage/project/Eels/eel_combined_Aja/VCF/Eels_filtered"
 
 #-----------Line count (how many variants remain?)
 sbatch -A Eels -t 12:00:00 --job-name line_count --wrap\
