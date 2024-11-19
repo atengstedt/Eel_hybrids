@@ -9,7 +9,7 @@ done | sort | uniq -c
 ##########################
 
 #==============Split VCF file into subsets (one with species and one with admixed) and scaffolds
-input="/faststorage/project/Eels/eel_combined_Aja/VCF/chr01-19.filtered.ann.mac3.max2.miss0.recode.vcf"
+input="/faststorage/project/Eels/eel_combined_Aja/VCF/chr01-19.filtered.ann.mac3.max2.miss1.recode.vcf"
 ancestral="/faststorage/project/Eels/eel_combined_Aja/phasing/eu+am"
 admixed="/faststorage/project/Eels/eel_combined_Aja/phasing/admixed"
 filter="/faststorage/project/Eels/eel_combined_Aja/PCAdmix/Eel_list_admixed.txt"
@@ -70,4 +70,4 @@ done
 cd "/faststorage/project/Eels/eel_combined_Aja/phasing/eu+am/"
 
 sbatch -A Eels -t 24:00:00 -c 8 --mem 24G --job-name merge --wrap\
- "bcftools concat --threads 8 -f z.txt -O v -o /faststorage/project/Eels/eel_combined_Aja/eel_combined_Aja/VCF/chr01-19.filtered.ann.mac3.max2.miss0.phased.vcf"
+ "bcftools concat --threads 8 -f z.txt -O v -o /faststorage/project/Eels/eel_combined_Aja/eel_combined_Aja/VCF/chr01-19.filtered.ann.mac3.max2.miss1.phased.vcf"
