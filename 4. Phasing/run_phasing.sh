@@ -47,3 +47,27 @@ do
 sbatch -A Eels -t 12:00:00 --wrap \
  "/faststorage/project/Eels/eel_genome_Aja/phasing/bin/shapeit -convert --input-haps ${folder}/${line}.phased --output-vcf ${folder}/${line}.phased.vcf"
 done
+
+#------------Compress scaffold files
+folder="/faststorage/project/Eels/eel_combined_Aja/phasing/eu+am/"
+
+cat ./chromosome_names.txt | while read line
+do
+sbatch -A Eels -t 12:00:00 --wrap \
+ "bgzip ${folder}/${line}.phased.vcf"
+done
+
+#------------Index scaffold files
+folder="/faststorage/project/Eels/eel_combined_Aja/phasing/eu+am/"
+
+cat ./chromosome_names.txt | while read line
+do
+sbatch -A Eels -t 12:00:00 --wrap \
+ "tabix ${folder}/${line}.phased.vcf.gz"
+done
+
+#===========Merge scaffold VCF files
+cd "/faststorage/project/Eels/eel_combined_Aja/phasing/eu+am/"
+
+sbatch -A Eels -t 24:00:00 -c 8 --mem 24G --job-name merge --wrap\
+ "bcftools concat --threads 8 -f z.txt -O v -o /faststorage/project/Eels/eel_combined_Aja/eel_combined_Aja/VCF/chr01-19.filtered.ann.mac3.max2.miss0.phased.vcf"
