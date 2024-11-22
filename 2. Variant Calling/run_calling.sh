@@ -33,16 +33,16 @@ done
 folder="/faststorage/project/Eels/eel_combined_Aja/VCF/raw_scaffolds"
 
 sbatch -A Eels -t 24:00:00 -c 8 --mem 24G --job-name merge --wrap\
- "bcftools concat --threads 8 -f ${folder}/z.txt -O v -o ${folder}/Eels_raw.vcf"
+ "bcftools concat --threads 8 -f ${folder}/z.txt -O v -o ${folder}/chr01-19.vcf"
  
 #-----------Line count (how many variants remain?)
 sbatch -A Eels -t 12:00:00 --job-name line_count --wrap\
- "bcftools view -H /faststorage/project/Eels/eel_combined_Aja/VCF/Eels_raw.vcf | wc -l"
+ "bcftools view -H /faststorage/project/Eels/eel_combined_Aja/VCF/chr01-19.vcf | wc -l"
 
 #-----------Rename individuals in header
 file="/faststorage/project/Eels/eel_combined_Aja/eel_combined_Aja/individuals.txt"
-input="/faststorage/project/Eels/eel_combined_Aja/eel_combined_Aja/VCF/Eels_raw.vcf"
-output="/faststorage/project/Eels/eel_combined_Aja/eel_combined_Aja/VCF/Eels_raw.reheader.vcf"
+input="/faststorage/project/Eels/eel_combined_Aja/eel_combined_Aja/VCF/chr01-19.vcf"
+output="/faststorage/project/Eels/eel_combined_Aja/eel_combined_Aja/VCF/chr01-19.reheader.vcf"
 
 sbatch -A Coregonus -t 12:00:00 --wrap\
  "bcftools reheader -s $file $input > $output"
@@ -51,31 +51,31 @@ sbatch -A Coregonus -t 12:00:00 --wrap\
 
 #===========Inspect SNP depth distribution
 awk '($0!~/^#/)&&($8~/^DP/){split($8,a,"[=;]");print a[2]}'\
- /faststorage/project/Eels/eel_combined_Aja/VCF/Eels_raw.vcf > /faststorage/project/Eels/eel_combined_Aja/VCF/Eels_raw.snp.depth
+ /faststorage/project/Eels/eel_combined_Aja/VCF/chr01-19.vcf > /faststorage/project/Eels/eel_combined_Aja/VCF/chr01-19.snp.depth
 
 #-----------Plot (R)
-a<-scan("/faststorage/project/Eels/eel_combined_Aja/VCF/Eels_raw.snp.depth")
+a<-scan("/faststorage/project/Eels/eel_combined_Aja/VCF/chr01-19.snp.depth")
 
-tiff(file="/faststorage/project/Eels/eel_combined_Aja/VCF/Eels_raw.SNP_depth.tiff", units="cm", width = 12, height = 10, res=300)
+tiff(file="/faststorage/project/Eels/eel_combined_Aja/VCF/chr01-19.SNP_depth.tiff", units="cm", width = 12, height = 10, res=300)
 par(mar=c(2,4,2,2)+.1,mgp=c(2,0.5,0), tck = -0.01, cex=0.6)
 hist(a[a<2000],100,main="SNP depth distribution",xlab="SNP depth")
 dev.off()
 
 #===========Filter (indels, monomorphic, depth, MapQ)
 sbatch -A Eels -t 12:00:00 --job-name vcf.sh --wrap\
- "vcfutils.pl varFilter -Q 20 -d 900 -D 1500 /faststorage/project/Eels/eel_combined_Aja/VCF/Eels_raw.vcf | vcftools --vcf - --remove-indels --maf 0.0001 --recode --recode-INFO-all --out /faststorage/project/Eels/eel_combined_Aja/VCF/Eels_filtered"
+ "vcfutils.pl varFilter -Q 20 -d 900 -D 1500 /faststorage/project/Eels/eel_combined_Aja/VCF/chr01-19.vcf | vcftools --vcf - --remove-indels --maf 0.0001 --recode --recode-INFO-all --out /faststorage/project/Eels/eel_combined_Aja/VCF/chr01-19.filtered"
 
 #-----------Line count (how many variants remain?)
 sbatch -A Eels -t 12:00:00 --job-name line_count --wrap\
- "bcftools view -H /faststorage/project/Eels/eel_combined_Aja/VCF/Eels_filtered.recode.vcf | wc -l"
+ "bcftools view -H /faststorage/project/Eels/eel_combined_Aja/VCF/chr01-19.filtered.recode.vcf | wc -l"
  
 #-------------Annotate SNP IDs
 sbatch -A Eels -t 12:00:00 --job-name annotate --wrap\
- "bcftools annotate --set-id '%CHROM\_%POS' -O v -o /faststorage/project/Eels/eel_combined_Aja/VCF/Eels_filtered.ann.vcf /faststorage/project/Eels/eel_combined_Aja/VCF/Eels_filtered.recode.vcf"
+ "bcftools annotate --set-id '%CHROM\_%POS' -O v -o /faststorage/project/Eels/eel_combined_Aja/VCF/Eels.filtered.ann.vcf /faststorage/project/Eels/eel_combined_Aja/VCF/chr01-19.filtered.recode.vcf"
 
 #------------Filter VCF file to remove singletons and doubletons, alleles that are not biallelic and SNPs with missing data
-input="/faststorage/project/Eels/eel_combined_Aja/VCF/Eels_filtered.ann.vcf"
-output="/faststorage/project/Eels/eel_combined_Aja/VCF/Eels_filtered.ann.mac3.max2.miss1"
+input="/faststorage/project/Eels/eel_combined_Aja/VCF/chr01-19.filtered.ann.vcf"
+output="/faststorage/project/Eels/eel_combined_Aja/VCF/chr01-19.filtered.ann.mac3.max2.miss1"
 
 sbatch -A Eels -t 12:00:00 --job-name filter --wrap\
  "vcftools --vcf ${input} --mac 3 --max-alleles 2 --max-missing 1 --recode --recode-INFO-all --out ${output}"
